@@ -32,3 +32,8 @@ secret.txt
 *.jpg
 
 *.vs
+
+# .NET build outputs
+[Bb]in/
+[Oo]bj/
+publish/

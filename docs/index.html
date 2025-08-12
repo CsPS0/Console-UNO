@@ -1,13 +1,85 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="CSS/style.css">
-    <title>UNO!</title>
-</head>
-<body id="oldal">
-    <script src="JS/script.js"></script>
+    <title>Console UNO - Download</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white p-6">
+    <div class="container mx-auto max-w-4xl">
+        <header class="text-center my-8">
+            <h1 class="text-5xl font-bold text-red-500 mb-4">Console UNO</h1>
+            <p class="text-xl text-gray-300">A classic card game, reimagined for your terminal!</p>
+        </header>
+
+        <section id="about" class="bg-gray-800 p-8 rounded-lg shadow-lg mb-8">
+            <h2 class="text-3xl font-semibold text-red-400 mb-4">About the Game</h2>
+            <p class="mb-4">Console UNO is a command-line interface (CLI) implementation of the popular UNO card game. Play against AI opponents or with friends in local multiplayer mode. Experience the classic game with a retro console feel!</p>
+            <p>This project aims to provide a fun and accessible way to play UNO, focusing on core gameplay and a clean, text-based interface.</p>
+        </section>
+
+        <section id="features" class="bg-gray-800 p-8 rounded-lg shadow-lg mb-8">
+            <h2 class="text-3xl font-semibold text-red-400 mb-4">Features</h2>
+            <ul class="list-disc list-inside space-y-2">
+                <li>Single-player mode against AI (1v1, 1v1v1, 1v1v1v1)</li>
+                <li>Local multiplayer mode (2-4 players)</li>
+                <li>Configurable settings for sound and animations</li>
+                <li>Cross-platform sound effects and music</li>
+                <li>Dynamic UI centering for a polished look</li>
+                <li>Self-contained executable for easy distribution</li>
+            </ul>
+        </section>
+
+        <section id="how-to-play" class="bg-gray-800 p-8 rounded-lg shadow-lg mb-8">
+            <h2 class="text-3xl font-semibold text-red-400 mb-4">How to Play</h2>
+            <h3 class="text-2xl font-medium text-gray-300 mb-2">Menu Navigation:</h3>
+            <ul class="list-disc list-inside mb-4">
+                <li>Numbers (1-9): Navigate menus</li>
+            </ul>
+            <h3 class="text-2xl font-medium text-gray-300 mb-2">In-Game Commands:</h3>
+            <ul class="list-disc list-inside mb-4">
+                <li>Numbers (1-9): Play corresponding card</li>
+                <li>D: Draw a card</li>
+                <li>Q: Quit game</li>
+            </ul>
+            <h3 class="text-2xl font-medium text-gray-300 mb-2">Settings Controls:</h3>
+            <ul class="list-disc list-inside">
+                <li>+: Increase volume</li>
+                <li>-: Decrease volume</li>
+                <li>Enter: Confirm volume</li>
+            </ul>
+        </section>
+
+        <section id="download" class="bg-gray-800 p-8 rounded-lg shadow-lg mb-8 text-center">
+            <h2 class="text-3xl font-semibold text-red-400 mb-4">Download Console UNO</h2>
+            <p class="mb-6">Get the latest version of Console UNO and start playing today!</p>
+            <a href="https://github.com/CsPS0/Console-UNO/releases/download/v1.0/UNO_v1.0.zip"
+               class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 ease-in-out inline-block"
+               download>
+                Download Now (v1.0)
+            </a>
+            <p class="text-sm text-gray-400 mt-4">Compatible with Windows 10/11 (64-bit)</p>
+            <p class="text-sm text-gray-400">Requires `beep.wav` and `music.wav` in the executable directory for sound.</p>
+        </section>
+
+        <section id="source-code" class="bg-gray-800 p-8 rounded-lg shadow-lg mb-8 text-center">
+            <h2 class="text-3xl font-semibold text-red-400 mb-4">Source Code & Contributions</h2>
+            <p class="mb-4">Console UNO is an open-source project. Feel free to explore the code, report issues, or contribute!</p>
+            <a href="https://github.com/CsPS0/Console-UNO" target="_blank"
+               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 ease-in-out inline-block">
+                View on GitHub
+            </a>
+        </section>
+
+        <footer class="text-center text-gray-500 text-sm py-4">
+            &copy; 2025 Console UNO. All rights reserved.
+        </footer>
+    </div>
 </body>
 </html>
