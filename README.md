@@ -50,3 +50,7 @@
 📖 The official rules can be found in the [Rules](RULES.md) document.  
 
 ✨ Enjoy the game! ✨  
+
+## 🎶 Audio Files
+
+For sound effects and music to work, please place `beep.wav` and `music.wav` files in the `uno-game/uno-game/` directory. These files are not included in the repository.

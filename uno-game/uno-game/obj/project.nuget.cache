@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "Wy3fv8QcdJ0=",
+  "dgSpecHash": "tWvIwY4woqk=",
   "success": true,
   "projectFilePath": "E:\\REPOS\\CSPS\\Console-UNO\\uno-game\\uno-game\\uno-game.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\solti_aks20xi\\.nuget\\packages\\netcoreaudio\\2.0.0\\netcoreaudio.2.0.0.nupkg.sha512"
+  ],
   "logs": []
 }

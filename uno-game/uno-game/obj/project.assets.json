@@ -1,11 +1,39 @@
 {
   "version": 3,
   "targets": {
-    "net8.0": {}
+    "net8.0": {
+      "NetCoreAudio/2.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/NetCoreAudio.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.1/NetCoreAudio.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "NetCoreAudio/2.0.0": {
+      "sha512": "uDZcOG1pHcfxoKr9LrYvh+zHf+3JlL3tWly+o4mICHm5s9INBzcJVWiO2hh17RPyZQ0Fvqiw4qsa396l77JM0Q==",
+      "type": "package",
+      "path": "netcoreaudio/2.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "README.md",
+        "icon.jpg",
+        "lib/netstandard2.1/NetCoreAudio.dll",
+        "netcoreaudio.2.0.0.nupkg.sha512",
+        "netcoreaudio.nuspec"
+      ]
+    }
+  },
   "projectFileDependencyGroups": {
-    "net8.0": []
+    "net8.0": [
+      "NetCoreAudio >= 2.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\solti_aks20xi\\.nuget\\packages\\": {},
@@ -56,6 +84,12 @@
     "frameworks": {
       "net8.0": {
         "targetAlias": "net8.0",
+        "dependencies": {
+          "NetCoreAudio": {
+            "target": "Package",
+            "version": "[2.0.0, )"
+          }
+        },
         "imports": [
           "net461",
           "net462",

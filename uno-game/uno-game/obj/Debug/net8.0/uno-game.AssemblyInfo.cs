@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("uno-game")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+36a7a80467215b77cded027127bf534597a1bc99")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c84c77d7b963f4f3aba72971be95fcbf1dbe5085")]
 [assembly: System.Reflection.AssemblyProductAttribute("uno-game")]
 [assembly: System.Reflection.AssemblyTitleAttribute("uno-game")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
