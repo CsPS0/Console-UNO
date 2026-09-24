@@ -1,6 +1,4 @@
-
 (function() {
-
     let audioCtx = null;
 
     function getAudioContext() {
@@ -17,6 +15,7 @@
     }
 
     let soundEnabled = true;
+    let isHungarian = true;
 
     function playTone(freq, duration, type = 'square', gainVal = 0.08) {
         if (!soundEnabled) return;
@@ -115,11 +114,17 @@
         }
 
         getLocalizedName() {
-            const colMap = { Red: 'Piros', Blue: 'Kek', Green: 'Zold', Yellow: 'Sarga', Wild: 'Szinvalaszto' };
-            const valMap = { Skip: 'Kimaradsz', Reverse: 'Fordito', '+2': '+2', '+4': '+4 Vad', Wild: 'Vad' };
+            const colMap = isHungarian
+                ? { Red: 'Piros', Blue: 'Kek', Green: 'Zold', Yellow: 'Sarga', Wild: 'Szinvalaszto' }
+                : { Red: 'Red', Blue: 'Blue', Green: 'Green', Yellow: 'Yellow', Wild: 'Wild' };
+            const valMap = isHungarian
+                ? { Skip: 'Kimaradsz', Reverse: 'Fordito', '+2': '+2', '+4': '+4 Vad', Wild: 'Vad' }
+                : { Skip: 'Skip', Reverse: 'Reverse', '+2': '+2', '+4': '+4 Wild', Wild: 'Wild' };
             const c = colMap[this.color] || this.color;
             const v = valMap[this.value] || this.value;
-            return this.color === 'Wild' && this.value !== '+4' ? 'Vad (Szinvalaszto)' : `${c} ${v}`;
+            return this.color === 'Wild' && this.value !== '+4'
+                ? (isHungarian ? 'Vad (Szinvalaszto)' : 'Wild (Color Choice)')
+                : `${c} ${v}`;
         }
 
         getAsciiLines(selected = false) {
@@ -147,19 +152,26 @@
         }
     }
 
+    let currentScreen = 'MAIN_MENU';
     let deck = [];
     let discardPile = [];
     let playerHand = [];
-    let aiHand = [];
+    let aiHands = [];
+    let numBots = 1;
     let currentCard = null;
     let selectedIndex = 0;
-    let lastAction = 'Udv a Console UNO-ban! Nyomj egy gombot a kezdeshez.';
+    let lastAction = '';
     let lastActionColor = 'c-cyan';
     let isGameOver = false;
     let winner = null;
     let pickingWildColor = false;
-    let pendingWildCard = null;
     let isAiTurn = false;
+
+    function setScreen(screen) {
+        currentScreen = screen;
+        Sound.beep();
+        render();
+    }
 
     function initDeck() {
         const d = [];
@@ -195,137 +207,117 @@
                 deck = [...discardPile];
                 discardPile = [];
                 shuffle(deck);
-                lastAction = 'A pakli elfogyott! Dobopakli ujrakeverve.';
+                lastAction = isHungarian ? 'A pakli elfogyott! Dobopakli ujrakeverve.' : 'Deck reshuffled!';
                 lastActionColor = 'c-wild';
             } else {
                 return null;
             }
         }
-        const card = deck.shift();
-        if (hand) hand.push(card);
+        const card = deck.pop();
+        if (card) hand.push(card);
         return card;
     }
 
-    function canPlay(card, target) {
-        if (!target) return true;
-        return card.color === 'Wild' || card.color === target.color || card.value === target.value;
-    }
-
-    function startNewGame() {
+    function startMatch(bots = 1) {
+        numBots = bots;
         deck = initDeck();
         discardPile = [];
         playerHand = [];
-        aiHand = [];
+        aiHands = Array.from({ length: numBots }, () => []);
+
+        for (let i = 0; i < 7; i++) {
+            drawCard(playerHand);
+            for (let b = 0; b < numBots; b++) {
+                drawCard(aiHands[b]);
+            }
+        }
+
+        do {
+            currentCard = deck.pop();
+        } while (currentCard.color === 'Wild');
+
+        discardPile.push(currentCard);
         selectedIndex = 0;
         isGameOver = false;
         winner = null;
         pickingWildColor = false;
-        pendingWildCard = null;
         isAiTurn = false;
+        lastAction = isHungarian ? 'Uj jatek indult! Te kezdesz.' : 'Game started! Your turn.';
+        lastActionColor = 'c-cyan';
 
-        for (let i = 0; i < 7; i++) {
-            drawCard(playerHand);
-            drawCard(aiHand);
-        }
-
-        currentCard = drawCard(null);
-        while (currentCard && currentCard.value === '+4') {
-            deck.push(currentCard);
-            shuffle(deck);
-            currentCard = drawCard(null);
-        }
-        if (currentCard && currentCard.color === 'Wild') {
-            currentCard.color = 'Red';
-        }
-
-        lastAction = 'Jatek elindult! Te vagy a soron kovetkezo.';
-        lastActionColor = 'c-yellow';
-        render();
+        setScreen('GAME');
     }
 
-    function playPlayerCard(idx) {
-        if (isGameOver || isAiTurn || pickingWildColor) return;
-        if (idx < 0 || idx >= playerHand.length) return;
+    function canPlay(card, topCard) {
+        if (!topCard) return true;
+        if (card.color === 'Wild') return true;
+        if (card.color === topCard.color) return true;
+        if (card.value === topCard.value) return true;
+        return false;
+    }
 
-        const card = playerHand[idx];
+    function playPlayerCard(index) {
+        if (currentScreen !== 'GAME' || isGameOver || isAiTurn || pickingWildColor) return;
+        if (index < 0 || index >= playerHand.length) return;
+
+        const card = playerHand[index];
         if (!canPlay(card, currentCard)) {
             Sound.invalid();
-            lastAction = 'Ervenytelen lepes! A lap nem egyezik szinben vagy ertekben.';
+            lastAction = isHungarian ? 'Ervenytelen lepes! Válassz azonos szinu vagy szamukartyat!' : 'Invalid move! Match color or value.';
             lastActionColor = 'c-red';
             render();
             return;
         }
 
-        playerHand.splice(idx, 1);
-        if (currentCard) discardPile.push(currentCard);
-        currentCard = card;
-
-        if (selectedIndex >= playerHand.length) {
-            selectedIndex = Math.max(0, playerHand.length - 1);
-        }
-
-        Sound.playCard();
-
         if (card.color === 'Wild') {
             pickingWildColor = true;
-            pendingWildCard = card;
-            lastAction = 'Vad kartya lerakva! Valassz szint: [1] Piros, [2] Kek, [3] Zold, [4] Sarga';
+            playerHand.splice(index, 1);
+            if (currentCard) discardPile.push(currentCard);
+            currentCard = card;
+            Sound.special();
+            lastAction = isHungarian ? 'Vad kartya! Valassz szint!' : 'Wild card! Choose a color!';
             lastActionColor = 'c-wild';
             render();
             return;
         }
 
-        finishPlayerTurn(card);
-    }
+        playerHand.splice(index, 1);
+        if (currentCard) discardPile.push(currentCard);
+        currentCard = card;
+        Sound.playCard();
+        lastAction = `${isHungarian ? 'Leraktad' : 'Played'}: ${card.getLocalizedName()}`;
+        lastActionColor = card.getColorClass();
 
-    function chooseColor(color) {
-        if (!pickingWildColor || !pendingWildCard) return;
-        pendingWildCard.color = color;
-        currentCard = pendingWildCard;
-        pickingWildColor = false;
-        pendingWildCard = null;
-        Sound.beep();
-
-        lastAction = `Valasztott szin: ${color === 'Red' ? 'Piros' : color === 'Blue' ? 'Kek' : color === 'Green' ? 'Zold' : 'Sarga'}`;
-        lastActionColor = currentCard.getColorClass();
-
-        finishPlayerTurn(currentCard);
-    }
-
-    function finishPlayerTurn(playedCard) {
         if (playerHand.length === 1) {
             Sound.uno();
-            lastAction = '*** UNO! Mar csak 1 lapod maradt! ***';
-            lastActionColor = 'c-yellow';
+            lastAction += ' *** UNO! ***';
         }
 
         if (playerHand.length === 0) {
-            winner = 'Te';
+            winner = isHungarian ? 'Te (Jatekos 1)' : 'You (Player 1)';
             isGameOver = true;
             Sound.victory();
-            render();
+            setScreen('VICTORY');
             return;
         }
 
+        if (selectedIndex >= playerHand.length) {
+            selectedIndex = Math.max(0, playerHand.length - 1);
+        }
+
         let aiSkips = false;
-        if (playedCard.value === 'Skip' || playedCard.value === 'Reverse') {
+        if (card.value === 'Skip' || card.value === 'Reverse') {
             Sound.special();
             aiSkips = true;
-            lastAction = `[${playedCard.value === 'Skip' ? 'KIMARAD' : 'FORDITO'}] AI kimarad a korbol! Ujra te jossz.`;
-            lastActionColor = 'c-yellow';
-        } else if (playedCard.value === '+2') {
+            lastAction += isHungarian ? ' -> AI kimarad a korbol!' : ' -> AI skips turn!';
+        } else if (card.value === '+2') {
             Sound.special();
-            drawCard(aiHand);
-            drawCard(aiHand);
+            for (let b = 0; b < numBots; b++) {
+                drawCard(aiHands[b]);
+                drawCard(aiHands[b]);
+            }
             aiSkips = true;
-            lastAction = '[+2] AI huzott 2 lapot es kimarad! Ujra te jossz.';
-            lastActionColor = 'c-red';
-        } else if (playedCard.value === '+4') {
-            Sound.special();
-            for (let k = 0; k < 4; k++) drawCard(aiHand);
-            aiSkips = true;
-            lastAction = '[+4] AI huzott 4 lapot es kimarad! Ujra te jossz.';
-            lastActionColor = 'c-red';
+            lastAction += isHungarian ? ' -> AI huzz 2 lapot es kimarad!' : ' -> AI draws 2 cards & skips!';
         }
 
         render();
@@ -336,106 +328,116 @@
         }
     }
 
-    function handleAiTurn() {
-        if (isGameOver) return;
+    function chooseColor(color) {
+        if (!pickingWildColor || !currentCard) return;
+        currentCard.color = color;
+        pickingWildColor = false;
+        Sound.beep();
 
-        let playIdx = -1;
-        for (let i = 0; i < aiHand.length; i++) {
-            if (canPlay(aiHand[i], currentCard) && ['Skip', 'Reverse', '+2', '+4', 'Wild'].includes(aiHand[i].value)) {
-                playIdx = i;
-                break;
+        const colName = isHungarian
+            ? (color === 'Red' ? 'Piros' : color === 'Blue' ? 'Kek' : color === 'Green' ? 'Zold' : 'Sarga')
+            : color;
+        lastAction = `${isHungarian ? 'Uj aktiv szin' : 'New active color'}: ${colName}`;
+        lastActionColor = currentCard.getColorClass();
+
+        if (currentCard.value === '+4') {
+            for (let b = 0; b < numBots; b++) {
+                for (let k = 0; k < 4; k++) drawCard(aiHands[b]);
             }
+            lastAction += isHungarian ? ' -> AI huzz 4 lapot es kimarad!' : ' -> AI draws 4 & skips!';
+            render();
+        } else {
+            isAiTurn = true;
+            render();
+            setTimeout(handleAiTurn, 1000);
         }
-        if (playIdx === -1) {
+    }
+
+    function handleAiTurn() {
+        if (currentScreen !== 'GAME' || isGameOver) return;
+
+        for (let b = 0; b < numBots; b++) {
+            const aiHand = aiHands[b];
+            let playIdx = -1;
+
             for (let i = 0; i < aiHand.length; i++) {
                 if (canPlay(aiHand[i], currentCard)) {
                     playIdx = i;
                     break;
                 }
             }
-        }
 
-        let playerSkips = false;
-
-        if (playIdx !== -1) {
-            const played = aiHand.splice(playIdx, 1)[0];
-            if (currentCard) discardPile.push(currentCard);
-            currentCard = played;
-
-            if (played.color === 'Wild') {
-                const cols = ['Red', 'Blue', 'Green', 'Yellow'];
-                played.color = cols[Math.floor(Math.random() * cols.length)];
-            }
-
-            Sound.playCard();
-            lastAction = `AI kijatszotta: ${played.getLocalizedName()}`;
-            lastActionColor = played.getColorClass();
-
-            if (played.value === 'Skip' || played.value === 'Reverse') {
-                Sound.special();
-                playerSkips = true;
-                lastAction += ' -> Kimaradsz a korbol!';
-            } else if (played.value === '+2') {
-                Sound.special();
-                drawCard(playerHand);
-                drawCard(playerHand);
-                playerSkips = true;
-                lastAction += ' -> Huzz 2 lapot es kimaradsz!';
-            } else if (played.value === '+4') {
-                Sound.special();
-                for (let k = 0; k < 4; k++) drawCard(playerHand);
-                playerSkips = true;
-                lastAction += ' -> Huzz 4 lapot es kimaradsz!';
-            }
-        } else {
-
-            const drawn = drawCard(aiHand);
-            Sound.drawCard();
-            if (drawn && canPlay(drawn, currentCard)) {
-                aiHand.pop();
+            if (playIdx !== -1) {
+                const played = aiHand.splice(playIdx, 1)[0];
                 if (currentCard) discardPile.push(currentCard);
-                currentCard = drawn;
-                if (drawn.color === 'Wild') {
-                    drawn.color = ['Red', 'Blue', 'Green', 'Yellow'][Math.floor(Math.random() * 4)];
+                currentCard = played;
+
+                if (played.color === 'Wild') {
+                    const cols = ['Red', 'Blue', 'Green', 'Yellow'];
+                    played.color = cols[Math.floor(Math.random() * cols.length)];
                 }
+
                 Sound.playCard();
-                lastAction = `AI huzott es azonnal lerakta: ${drawn.getLocalizedName()}`;
-                lastActionColor = drawn.getColorClass();
+                lastAction = `AI ${b + 1} ${isHungarian ? 'kijatszotta' : 'played'}: ${played.getLocalizedName()}`;
+                lastActionColor = played.getColorClass();
+
+                if (played.value === 'Skip' || played.value === 'Reverse') {
+                    Sound.special();
+                    lastAction += isHungarian ? ' -> Kimaradsz a korbol!' : ' -> You miss your turn!';
+                } else if (played.value === '+2') {
+                    Sound.special();
+                    drawCard(playerHand);
+                    drawCard(playerHand);
+                    lastAction += isHungarian ? ' -> Huzz 2 lapot es kimaradsz!' : ' -> Draw 2 cards & miss turn!';
+                } else if (played.value === '+4') {
+                    Sound.special();
+                    for (let k = 0; k < 4; k++) drawCard(playerHand);
+                    lastAction += isHungarian ? ' -> Huzz 4 lapot es kimaradsz!' : ' -> Draw 4 cards & miss turn!';
+                }
             } else {
-                lastAction = 'AI huzott egy lapot a paklibol.';
-                lastActionColor = 'c-cyan';
+                const drawn = drawCard(aiHand);
+                Sound.drawCard();
+                if (drawn && canPlay(drawn, currentCard)) {
+                    aiHand.pop();
+                    if (currentCard) discardPile.push(currentCard);
+                    currentCard = drawn;
+                    if (drawn.color === 'Wild') {
+                        drawn.color = ['Red', 'Blue', 'Green', 'Yellow'][Math.floor(Math.random() * 4)];
+                    }
+                    Sound.playCard();
+                    lastAction = `AI ${b + 1} ${isHungarian ? 'huzott es lerakta' : 'drew & played'}: ${drawn.getLocalizedName()}`;
+                    lastActionColor = drawn.getColorClass();
+                } else {
+                    lastAction = `AI ${b + 1} ${isHungarian ? 'huzott egy lapot.' : 'drew a card.'}`;
+                    lastActionColor = 'c-cyan';
+                }
+            }
+
+            if (aiHand.length === 1) {
+                Sound.uno();
+                lastAction += ` *** AI ${b + 1}: UNO! ***`;
+            }
+
+            if (aiHand.length === 0) {
+                winner = `AI (Bot ${b + 1})`;
+                isGameOver = true;
+                Sound.invalid();
+                setScreen('VICTORY');
+                return;
             }
         }
 
-        if (aiHand.length === 1) {
-            Sound.uno();
-            lastAction += ' *** AI: UNO! ***';
-        }
-
-        if (aiHand.length === 0) {
-            winner = 'AI (Bot)';
-            isGameOver = true;
-            Sound.invalid();
-            render();
-            return;
-        }
-
+        isAiTurn = false;
         render();
-
-        if (playerSkips) {
-            setTimeout(handleAiTurn, 1200);
-        } else {
-            isAiTurn = false;
-        }
     }
 
     function handlePlayerDraw() {
-        if (isGameOver || isAiTurn || pickingWildColor) return;
+        if (currentScreen !== 'GAME' || isGameOver || isAiTurn || pickingWildColor) return;
         const drawn = drawCard(playerHand);
         if (drawn) {
             Sound.drawCard();
             selectedIndex = playerHand.length - 1;
-            lastAction = `Huztal egy lapot: ${drawn.getLocalizedName()}`;
+            lastAction = `${isHungarian ? 'Huztal egy lapot' : 'Drew card'}: ${drawn.getLocalizedName()}`;
             lastActionColor = 'c-cyan';
 
             isAiTurn = true;
@@ -443,7 +445,7 @@
             setTimeout(handleAiTurn, 1000);
         } else {
             Sound.invalid();
-            lastAction = 'Nincs tobb lap a pakliban!';
+            lastAction = isHungarian ? 'Nincs tobb lap a pakliban!' : 'No more cards in draw deck!';
             lastActionColor = 'c-red';
             render();
         }
@@ -453,180 +455,294 @@
         const screen = document.getElementById('terminal-screen');
         if (!screen) return;
 
-        if (isGameOver) {
-            screen.innerHTML = renderVictoryScreen();
-            return;
-        }
-
         let html = '';
-        html += '<span class="c-red">[ C O N S O L E   U N O ]</span>\n';
-        html += '<span class="c-darkgray">Fejleszto: Solti Csongor Peter</span>\n';
-        html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n';
 
-        html += `  <span class="c-white">KOVETKEZO:</span> <span class="c-yellow">${isAiTurn ? 'AI (Bot)      ' : 'Te (Jatekos 1)'}</span>`;
-        html += ` | <span class="c-white">AI LAPJAI:</span> <span class="c-cyan">${aiHand.length} db</span>`;
-        html += ` | <span class="c-white">PAKLIK:</span> <span class="c-green">${deck.length} lap</span>\n`;
-        html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n\n';
+        if (currentScreen === 'MAIN_MENU') {
+            html += '<span class="c-red">[ C O N S O L E   U N O ]</span>\n';
+            html += '<span class="c-darkgray">Fejleszto: Solti Csongor Peter</span>\n';
+            html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n\n';
 
-        const drawBox = [
-            '┌─────┐',
-            '│░░░░░│',
-            '│ UNO │',
-            '│░░░░░│',
-            '└─────┘'
-        ];
-        const discardBox = currentCard ? currentCard.getAsciiLines(false) : [
-            '┌─────┐',
-            '│     │',
-            '│ --- │',
-            '│     │',
-            '└─────┘'
-        ];
-        const disClass = currentCard ? currentCard.getColorClass() : 'c-white';
+            html += '┌─────────────────────────────────────────────────────┐\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'1\')">1. Egyjatekos Mod (vs AI)</span>                          │\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'2\')">2. Helyi Tobbjatekos (2-4 jatekos)</span>                 │\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'3\')">3. Beallitasok (Settings)</span>                          │\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'4\')">4. Jatekszabalyok & Utmutato</span>                       │\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'5\')">5. Kilepes / Reset</span>                                 │\n';
+            html += '└─────────────────────────────────────────────────────┘\n\n';
 
-        html += '          <span class="c-darkgray">[ HUZOPAKLI ]</span>           <span class="c-darkgray">[ DOBOPAKLI ]</span>\n';
-        for (let r = 0; r < 5; r++) {
-            html += `            <span class="c-red">${drawBox[r]}</span>`;
-            html += r === 2 ? '     --->     ' : '              ';
-            html += `<span class="${disClass}">${discardBox[r]}</span>\n`;
+            html += `  <span class="c-yellow font-bold">${isHungarian ? 'Valassz a szamgombokkal (1-5) vagy kattints a fenti opciokra!' : 'Select using keys (1-5) or click options above!'}</span>\n`;
+            if (lastAction) {
+                html += `\n  <span class="${lastActionColor}">>> ${lastAction}</span>\n`;
+            }
         }
-        const colName = currentCard ? (currentCard.color === 'Red' ? 'Piros' : currentCard.color === 'Blue' ? 'Kek' : currentCard.color === 'Green' ? 'Zold' : 'Sarga') : 'None';
-        html += `                                  <span class="${disClass}">Aktiv szin: [ ${colName} ]</span>\n\n`;
+        else if (currentScreen === 'SINGLE_PLAYER_MENU') {
+            html += '<span class="c-yellow">=== EGYJATEKOS MOD (VS AI) ===</span>\n';
+            html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n\n';
 
-        html += `  <span class="${lastActionColor} font-bold">>> ${lastAction}</span>\n`;
-        html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n';
+            html += '┌───────────────────────────────────┐\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'1\')">1. 1v1 (Te vs 1 AI)</span>             │\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'2\')">2. 1v1v1 (Te vs 2 AI)</span>           │\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'3\')">3. 1v1v1v1 (Te vs 3 AI)</span>         │\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'4\')">4. Vissza a Fomenube</span>            │\n';
+            html += '└───────────────────────────────────┘\n\n';
 
-        if (pickingWildColor) {
-            html += '\n  <span class="c-yellow font-bold">=== VALASSZ SZINT: ===</span>\n';
-            html += '  <button onclick="window.UNO.chooseColor(\'Red\')" class="ctrl-btn c-red">[1] PIROS</button> ';
-            html += '  <button onclick="window.UNO.chooseColor(\'Blue\')" class="ctrl-btn c-blue">[2] KEK</button> ';
-            html += '  <button onclick="window.UNO.chooseColor(\'Green\')" class="ctrl-btn c-green">[3] ZOLD</button> ';
-            html += '  <button onclick="window.UNO.chooseColor(\'Yellow\')" class="ctrl-btn c-yellow">[4] SARGA</button>\n';
+            html += `  <span class="c-cyan">${isHungarian ? 'Nyomj 1-4 gombot a valasztashoz.' : 'Press keys 1-4 to select.'}</span>\n`;
+        }
+        else if (currentScreen === 'MULTIPLAYER_MENU') {
+            html += '<span class="c-yellow">=== HELYI TOBBJATEKOS (2-4 JATEKOS) ===</span>\n';
+            html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n\n';
+
+            html += '┌───────────────────────────────────┐\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'1\')">1. 2 Jatekos Helyi Jatek</span>        │\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'2\')">2. 3 Jatekos Helyi Jatek</span>        │\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'3\')">3. 4 Jatekos Helyi Jatek</span>        │\n';
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'4\')">4. Vissza a Fomenube</span>            │\n';
+            html += '└───────────────────────────────────┘\n\n';
+
+            html += `  <span class="c-cyan">${isHungarian ? 'Nyomj 1-4 gombot a jatek inditasahoz.' : 'Press keys 1-4 to select.'}</span>\n`;
+        }
+        else if (currentScreen === 'SETTINGS') {
+            html += '<span class="c-yellow">=== BEALLITASOK (SETTINGS) ===</span>\n';
+            html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n\n';
+
+            const langStr = isHungarian ? 'Magyar' : 'English';
+            const soundStr = soundEnabled ? (isHungarian ? 'BE' : 'ON') : (isHungarian ? 'KI' : 'OFF');
+
+            html += '┌───────────────────────────────────────────────┐\n';
+            html += `│  <span class="tui-menu-link" onclick="window.UNO.selectMenu('1')">1. Nyelv (Language): ${langStr.padEnd(23)}</span> │\n`;
+            html += `│  <span class="tui-menu-link" onclick="window.UNO.selectMenu('2')">2. Hanghatasok (Sound): ${soundStr.padEnd(21)}</span> │\n`;
+            html += '│  <span class="tui-menu-link" onclick="window.UNO.selectMenu(\'3\')">3. Vissza a Fomenube</span>                         │\n';
+            html += '└───────────────────────────────────────────────┘\n\n';
+        }
+        else if (currentScreen === 'TUTORIAL') {
+            html += '<span class="c-yellow">=== JATEKSZABALYOK & UTMUTATO ===</span>\n';
             html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n';
-        } else {
+            html += '  <span class="c-white">Alapveto Szabalyok:</span>\n';
+            html += '  - Egyezes: Rakj le azonos szinu vagy azonos erteku kartyat!\n';
+            html += '  - Laphuzas: Ha nem tudsz rakni, nyomj [D]-t egy lap huzasahoz!\n';
+            html += '  - UNO Bemondas: Ha 1 lapod marad, a rendszer automatikusan jelzi!\n\n';
+            html += '  <span class="c-white">Specialis Akciokartyak:</span>\n';
+            html += '  - [SKIP]: A kovetkezo jatekos kimarad a korbol\n';
+            html += '  - [REVERSE]: Megforditja a jatek haladasi iranyat\n';
+            html += '  - [+2]: A kovetkezo jatekos 2 lapot huz es kimarad\n';
+            html += '  - [WILD]: Barmikor lerakhato, uj szint valaszthatsz\n';
+            html += '  - [+4 WILD]: Uj szint valaszthatsz + a kovetkezo jatekos 4 lapot huz\n\n';
+            html += '  <button onclick="window.UNO.setScreen(\'MAIN_MENU\')" class="tui-btn tui-btn-primary">VISSZA A FOMENUBE (ENTER / 1)</button>\n';
+        }
+        else if (currentScreen === 'GAME') {
+            html += '<span class="c-red">[ C O N S O L E   U N O ]</span>\n';
+            html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n';
 
-            const pageSize = 7;
-            const pageStart = Math.floor(selectedIndex / pageSize) * pageSize;
-            const pageEnd = Math.min(pageStart + pageSize, playerHand.length);
+            html += `  <span class="c-white">KOVETKEZO:</span> <span class="c-yellow">${isAiTurn ? 'AI (Bot)      ' : 'Te (Jatekos 1)'}</span>`;
+            html += ` | <span class="c-white">AI LAPJAI:</span> <span class="c-cyan">${aiHands.map(h => h.length + 'db').join(', ')}</span>`;
+            html += ` | <span class="c-white">PAKLIK:</span> <span class="c-green">${deck.length} lap</span>\n`;
+            html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n\n';
 
-            html += `  <span class="c-white">LAPJAID (${playerHand.length} db) - [${selectedIndex + 1}. kivalasztva]:</span>\n`;
+            const drawBox = [
+                '┌─────┐',
+                '│░░░░░│',
+                '│ UNO │',
+                '│░░░░░│',
+                '└─────┘'
+            ];
+            const discardBox = currentCard ? currentCard.getAsciiLines(false) : [
+                '┌─────┐',
+                '│     │',
+                '│ --- │',
+                '│     │',
+                '└─────┘'
+            ];
+            const disClass = currentCard ? currentCard.getColorClass() : 'c-white';
 
-            html += '    ';
-            html += pageStart > 0 ? '<span class="c-cyan">&lt;&lt; </span>' : '   ';
-            for (let i = pageStart; i < pageEnd; i++) {
-                if (i === selectedIndex) {
-                    html += `<span class="c-yellow font-bold"> &gt;[${i + 1}]&lt; </span>`;
-                } else {
-                    html += `<span class="c-gray">   [${i + 1}]  </span>`;
-                }
-            }
-            if (pageEnd < playerHand.length) {
-                html += '<span class="c-cyan"> &gt;&gt;</span>';
-            }
-            html += '\n';
-
-            const rendered = [];
-            for (let i = pageStart; i < pageEnd; i++) {
-                rendered.push(playerHand[i].getAsciiLines(i === selectedIndex));
-            }
-
+            html += '          <span class="c-darkgray">[ HUZOPAKLI ]</span>           <span class="c-darkgray">[ DOBOPAKLI ]</span>\n';
             for (let r = 0; r < 5; r++) {
+                html += `            <span class="c-red">${drawBox[r]}</span>`;
+                html += r === 2 ? '     --->     ' : '              ';
+                html += `<span class="${disClass}">${discardBox[r]}</span>\n`;
+            }
+            const colName = currentCard ? (currentCard.color === 'Red' ? 'Piros' : currentCard.color === 'Blue' ? 'Kek' : currentCard.color === 'Green' ? 'Zold' : 'Sarga') : 'None';
+            html += `                                  <span class="${disClass}">Aktiv szin: [ ${colName} ]</span>\n\n`;
+
+            html += `  <span class="${lastActionColor} font-bold">>> ${lastAction}</span>\n`;
+            html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n';
+
+            if (pickingWildColor) {
+                html += '\n  <span class="c-yellow font-bold">=== VALASSZ SZINT: ===</span>\n';
+                html += '  <button onclick="window.UNO.chooseColor(\'Red\')" class="tui-btn c-red">[1] PIROS</button> ';
+                html += '  <button onclick="window.UNO.chooseColor(\'Blue\')" class="tui-btn c-blue">[2] KEK</button> ';
+                html += '  <button onclick="window.UNO.chooseColor(\'Green\')" class="tui-btn c-green">[3] ZOLD</button> ';
+                html += '  <button onclick="window.UNO.chooseColor(\'Yellow\')" class="tui-btn c-yellow">[4] SARGA</button>\n';
+                html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n';
+            } else {
+                const pageSize = 7;
+                const pageStart = Math.floor(selectedIndex / pageSize) * pageSize;
+                const pageEnd = Math.min(pageStart + pageSize, playerHand.length);
+
+                html += `  <span class="c-white">LAPJAID (${playerHand.length} db) - [${selectedIndex + 1}. kivalasztva]:</span>\n`;
+
                 html += '    ';
-                html += (pageStart > 0 && r === 2) ? '<span class="c-cyan">&lt;- </span>' : '   ';
-                for (let c = 0; c < rendered.length; c++) {
-                    const cardIdx = pageStart + c;
-                    const cClass = playerHand[cardIdx].getColorClass();
-                    html += `<span class="${cClass}">${rendered[c][r]}</span> `;
+                html += pageStart > 0 ? '<span class="c-cyan">&lt;&lt; </span>' : '   ';
+                for (let i = pageStart; i < pageEnd; i++) {
+                    if (i === selectedIndex) {
+                        html += `<span class="c-yellow font-bold"> &gt;[${i + 1}]&lt; </span>`;
+                    } else {
+                        html += `<span class="c-gray">   [${i + 1}]  </span>`;
+                    }
                 }
-                if (pageEnd < playerHand.length && r === 2) {
-                    html += '<span class="c-cyan">-&gt;</span>';
+                if (pageEnd < playerHand.length) {
+                    html += '<span class="c-cyan"> &gt;&gt;</span>';
                 }
                 html += '\n';
-            }
 
-            html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n';
-            html += '  <span class="c-white">[<- / ->]: Lap kivalasztasa  |  [ENTER]: Lerakas  |  [D]: Huzas  |  [Q]: Uj jatek</span>\n';
+                const rendered = [];
+                for (let i = pageStart; i < pageEnd; i++) {
+                    rendered.push(playerHand[i].getAsciiLines(i === selectedIndex));
+                }
+
+                for (let r = 0; r < 5; r++) {
+                    html += '    ';
+                    html += (pageStart > 0 && r === 2) ? '<span class="c-cyan">&lt;- </span>' : '   ';
+                    for (let c = 0; c < rendered.length; c++) {
+                        const cardIdx = pageStart + c;
+                        const cClass = playerHand[cardIdx].getColorClass();
+                        html += `<span class="${cClass}">${rendered[c][r]}</span> `;
+                    }
+                    if (pageEnd < playerHand.length && r === 2) {
+                        html += '<span class="c-cyan">-&gt;</span>';
+                    }
+                    html += '\n';
+                }
+
+                html += '<span class="c-darkgray">--------------------------------------------------------------------------</span>\n';
+                html += '  <span class="c-white">[<- / ->]: Lap kivalasztasa  |  [ENTER]: Lerakas  |  [D]: Huzas  |  [Q]: Menü</span>\n';
+            }
+        }
+        else if (currentScreen === 'VICTORY') {
+            html += '<span class="c-yellow font-bold">';
+            html += '             ___________             \n';
+            html += '            \'.__==_==_==_.\'            \n';
+            html += '            .-\\:      /-.            \n';
+            html += '           | (|:.     |) |           \n';
+            html += '            \'-|:.     |-\'            \n';
+            html += '              \\::.    /              \n';
+            html += '               \'::. .\'               \n';
+            html += '                 ) (                 \n';
+            html += '               _.\' \'._               \n';
+            html += '              `"""""""`              \n';
+            html += '</span>\n';
+            html += `  <span class="c-green font-bold text-lg">*** GYOZELEM! ${winner} megnyerte a jatekot! ***</span>\n\n`;
+            html += '  <button onclick="window.UNO.setScreen(\'MAIN_MENU\')" class="tui-btn tui-btn-primary">VISSZA A FOMENUBE (Q)</button>\n';
         }
 
         screen.innerHTML = html;
     }
 
-    function renderVictoryScreen() {
-        let html = '';
-        html += '<span class="c-yellow font-bold">';
-        html += '             ___________             \n';
-        html += '            \'.__==_==_==_.\'            \n';
-        html += '            .-\\:      /-.            \n';
-        html += '           | (|:.     |) |           \n';
-        html += '            \'-|:.     |-\'            \n';
-        html += '              \\::.    /              \n';
-        html += '               \'::. .\'               \n';
-        html += '                 ) (                 \n';
-        html += '               _.\' \'._               \n';
-        html += '              `"""""""`              \n';
-        html += '</span>\n';
-        html += `  <span class="c-green font-bold text-lg">*** GYOZELEM! ${winner} megnyerte a jatekot! ***</span>\n\n`;
-        html += '  <button onclick="window.UNO.startNewGame()" class="ctrl-btn ctrl-btn-primary">UJ JATEK INDITASA (Q)</button>\n';
-        return html;
+    function selectMenu(keyStr) {
+        Sound.beep();
+        if (currentScreen === 'MAIN_MENU') {
+            if (keyStr === '1') setScreen('SINGLE_PLAYER_MENU');
+            else if (keyStr === '2') setScreen('MULTIPLAYER_MENU');
+            else if (keyStr === '3') setScreen('SETTINGS');
+            else if (keyStr === '4') setScreen('TUTORIAL');
+            else if (keyStr === '5') {
+                lastAction = 'Kileptel a menubol. Nyomj 1-es gombot a jatek inditasahoz!';
+                render();
+            }
+        }
+        else if (currentScreen === 'SINGLE_PLAYER_MENU') {
+            if (keyStr === '1') startMatch(1);
+            else if (keyStr === '2') startMatch(2);
+            else if (keyStr === '3') startMatch(3);
+            else if (keyStr === '4') setScreen('MAIN_MENU');
+        }
+        else if (currentScreen === 'MULTIPLAYER_MENU') {
+            if (keyStr === '1' || keyStr === '2' || keyStr === '3') startMatch(parseInt(keyStr));
+            else if (keyStr === '4') setScreen('MAIN_MENU');
+        }
+        else if (currentScreen === 'SETTINGS') {
+            if (keyStr === '1') {
+                isHungarian = !isHungarian;
+                render();
+            } else if (keyStr === '2') {
+                window.UNO.toggleSound();
+                render();
+            } else if (keyStr === '3') {
+                setScreen('MAIN_MENU');
+            }
+        }
     }
 
     window.addEventListener('keydown', (e) => {
-
         if (['ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
             e.preventDefault();
         }
 
+        if (currentScreen === 'MAIN_MENU' || currentScreen === 'SINGLE_PLAYER_MENU' || currentScreen === 'MULTIPLAYER_MENU' || currentScreen === 'SETTINGS') {
+            if (['1', '2', '3', '4', '5'].includes(e.key)) {
+                selectMenu(e.key);
+                return;
+            }
+        }
+
+        if (currentScreen === 'TUTORIAL') {
+            setScreen('MAIN_MENU');
+            return;
+        }
+
         if (e.key === 'q' || e.key === 'Q') {
-            startNewGame();
+            setScreen('MAIN_MENU');
             return;
         }
 
-        if (pickingWildColor) {
-            if (e.key === '1') chooseColor('Red');
-            if (e.key === '2') chooseColor('Blue');
-            if (e.key === '3') chooseColor('Green');
-            if (e.key === '4') chooseColor('Yellow');
-            return;
-        }
+        if (currentScreen === 'GAME') {
+            if (pickingWildColor) {
+                if (e.key === '1') chooseColor('Red');
+                if (e.key === '2') chooseColor('Blue');
+                if (e.key === '3') chooseColor('Green');
+                if (e.key === '4') chooseColor('Yellow');
+                return;
+            }
 
-        if (e.key === 'ArrowLeft') {
-            if (selectedIndex > 0) {
-                selectedIndex--;
-                Sound.beep();
-                render();
-            }
-        } else if (e.key === 'ArrowRight') {
-            if (selectedIndex < playerHand.length - 1) {
-                selectedIndex++;
-                Sound.beep();
-                render();
-            }
-        } else if (e.key === 'Enter' || e.code === 'Space') {
-            playPlayerCard(selectedIndex);
-        } else if (e.key === 'd' || e.key === 'D') {
-            handlePlayerDraw();
-        } else if (!isNaN(parseInt(e.key)) && parseInt(e.key) >= 1 && parseInt(e.key) <= 9) {
-            const pageSize = 7;
-            const pageStart = Math.floor(selectedIndex / pageSize) * pageSize;
-            const targetIdx = pageStart + (parseInt(e.key) - 1);
-            if (targetIdx < playerHand.length) {
-                selectedIndex = targetIdx;
+            if (e.key === 'ArrowLeft') {
+                if (selectedIndex > 0) {
+                    selectedIndex--;
+                    Sound.beep();
+                    render();
+                }
+            } else if (e.key === 'ArrowRight') {
+                if (selectedIndex < playerHand.length - 1) {
+                    selectedIndex++;
+                    Sound.beep();
+                    render();
+                }
+            } else if (e.key === 'Enter' || e.code === 'Space') {
                 playPlayerCard(selectedIndex);
+            } else if (e.key === 'd' || e.key === 'D') {
+                handlePlayerDraw();
+            } else if (!isNaN(parseInt(e.key)) && parseInt(e.key) >= 1 && parseInt(e.key) <= 9) {
+                const pageSize = 7;
+                const pageStart = Math.floor(selectedIndex / pageSize) * pageSize;
+                const targetIdx = pageStart + (parseInt(e.key) - 1);
+                if (targetIdx < playerHand.length) {
+                    selectedIndex = targetIdx;
+                    playPlayerCard(selectedIndex);
+                }
             }
         }
     });
 
     window.UNO = {
-        startNewGame,
+        setScreen,
+        selectMenu,
         moveLeft: () => {
-            if (selectedIndex > 0) {
+            if (currentScreen === 'GAME' && selectedIndex > 0) {
                 selectedIndex--;
                 Sound.beep();
                 render();
             }
         },
         moveRight: () => {
-            if (selectedIndex < playerHand.length - 1) {
+            if (currentScreen === 'GAME' && selectedIndex < playerHand.length - 1) {
                 selectedIndex++;
                 Sound.beep();
                 render();
@@ -642,14 +758,20 @@
                 btn.textContent = soundEnabled ? 'Hang: BE' : 'Hang: KI';
             }
             if (soundEnabled) Sound.beep();
+        },
+        toggleTheme: () => {
+            document.body.classList.toggle('light-mode');
+            const btn = document.getElementById('theme-btn');
+            if (btn) {
+                const isLight = document.body.classList.contains('light-mode');
+                btn.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+            }
         }
     };
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            startNewGame();
-        });
+        document.addEventListener('DOMContentLoaded', () => render());
     } else {
-        startNewGame();
+        render();
     }
 })();

@@ -3,355 +3,84 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Console UNO - BMSZC Neumann Janos Informatikai Technikum</title>
+        <title>Console UNO - Web TUI Edition</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="css/style.css" />
     </head>
-    <body class="bg-gray-950 text-white p-6">
-        <div class="container mx-auto max-w-4xl">
-            <header class="text-center my-8">
-                <h1
-                    class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-yellow-400 to-green-400 mb-3"
-                >
-                    Console UNO
-                </h1>
-                <p class="text-xl text-gray-300">
-                    A klasszikus kartyajatek C# es .NET 10 kornyezetben a
-                    terminalodra!
-                </p>
-                <p class="text-sm text-gray-400 mt-1">
-                    Keszitette:
-                    <span class="text-white font-medium"
-                        >Solti Csongor Peter</span
+    <body class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-4xl">
+            <header class="mb-4 flex flex-wrap items-center justify-between border-b border-gray-700 pb-3">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-wider">Console UNO</h1>
+                    <p class="text-sm text-gray-400 font-mono mt-1">C# &amp; .NET 10 Terminal Game Web Engine</p>
+                </div>
+                <div class="mt-2 sm:mt-0 flex items-center gap-2">
+                    <button
+                        id="theme-btn"
+                        onclick="window.UNO.toggleTheme()"
+                        class="tui-btn"
                     >
-                </p>
+                        Dark Mode
+                    </button>
+                    <button
+                        id="sound-btn"
+                        onclick="window.UNO.toggleSound()"
+                        class="tui-btn"
+                    >
+                        Hang: BE
+                    </button>
+                </div>
             </header>
 
-            <section id="game-section" class="mb-10">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="text-3xl font-bold text-yellow-400">
-                        Jatssz a Bongeszoben!
-                    </h2>
-                    <span
-                        class="text-xs bg-green-500/20 text-green-400 border border-green-500/30 px-3 py-1 rounded-full font-mono font-semibold"
-                        >GitHub Pages Kompatibilis</span
-                    >
-                </div>
-                <p class="text-gray-300 mb-4">
-                    Probald ki a Console UNO-t kozvetlenul a weboldalon!
-                    Iranyithatod billentyuzetrol (Nyilak, Enter, D, 1-9) vagy a
-                    lenti gombokkal:
-                </p>
-
-                <div class="terminal-window">
-                    <div class="terminal-header">
-                        <div class="terminal-dots">
-                            <div class="dot dot-red"></div>
-                            <div class="dot dot-yellow"></div>
-                            <div class="dot dot-green"></div>
-                        </div>
-                        <div class="terminal-title">
-                            Console UNO - Web Terminal Edition
-                        </div>
-                        <div class="text-xs text-gray-400 font-mono">
-                            .NET 10 & JS Engine
-                        </div>
-                    </div>
-
-                    <div
-                        id="terminal-screen"
-                        class="terminal-body"
-                        tabindex="0"
-                    >
-                        Betoltes...
-                    </div>
-
-                    <div
-                        class="bg-gray-900 border-t border-gray-800 p-4 flex flex-wrap gap-2 justify-center items-center"
-                    >
-                        <button
-                            onclick="window.UNO.moveLeft()"
-                            class="ctrl-btn"
-                        >
-                            &larr; Balra
-                        </button>
-                        <button
-                            onclick="window.UNO.playCurrent()"
-                            class="ctrl-btn ctrl-btn-primary"
-                        >
-                            Lerakas (ENTER)
-                        </button>
-                        <button
-                            onclick="window.UNO.moveRight()"
-                            class="ctrl-btn"
-                        >
-                            Jobbra &rarr;
-                        </button>
-                        <button
-                            onclick="window.UNO.draw()"
-                            class="ctrl-btn ctrl-btn-danger"
-                        >
-                            Huzas (D)
-                        </button>
-                        <button
-                            id="sound-btn"
-                            onclick="window.UNO.toggleSound()"
-                            class="ctrl-btn"
-                        >
-                            Hang: BE
-                        </button>
-                        <button
-                            onclick="window.UNO.startNewGame()"
-                            class="ctrl-btn"
-                        >
-                            Uj Jatek (Q)
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            <section
-                id="about"
-                class="bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-lg mb-8"
-            >
-                <h2 class="text-3xl font-bold text-red-400 mb-4">A Jatekrol</h2>
-                <p class="mb-4 text-gray-300 leading-relaxed">
-                    A Console UNO a nepszeru UNO kartyajatek egy terminalos,
-                    interaktiv implementacioja. Kifejezetten a palyavalasztasi
-                    nyilt napra keszult, hogy bemutassa a 7. es 8. osztalyos
-                    diakoknak, mit lehet megvalositani C# es .NET 10
-                    segitsegevel.
-                </p>
-                <p class="text-gray-300 leading-relaxed">
-                    Szines ASCII kartyak, nyilakkal vezerelheto interaktiv
-                    kezvalasztas, beepitett 8-bites retro hanghatasok,
-                    mesterseges intelligencia elleni jatek es tobbjatekos mod
-                    varja a jatekosokat.
-                </p>
-            </section>
-
-            <section
-                id="features"
-                class="bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-lg mb-8"
-            >
-                <h2 class="text-3xl font-bold text-yellow-400 mb-4">
-                    Fobb Funkciok
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div
-                        class="bg-gray-800/60 p-4 rounded-xl border border-gray-700/50"
-                    >
-                        <h3 class="font-semibold text-lg text-white mb-1">
-                            ASCII Kartyagrafika
-                        </h3>
-                        <p class="text-sm text-gray-300">
-                            Tobbsoros, szines kartyadobozok egyertelmu
-                            szimbolumokkal (X = Kimaradsz, <> = Fordito, +2, +4,
-                            W = Vad).
-                        </p>
-                    </div>
-                    <div
-                        class="bg-gray-800/60 p-4 rounded-xl border border-gray-700/50"
-                    >
-                        <h3 class="font-semibold text-lg text-white mb-1">
-                            Nyilakkal Vezerelheto Kez
-                        </h3>
-                        <p class="text-sm text-gray-300">
-                            A Balra es Jobbra nyilakkal bongeszheted a
-                            lapjaidat, ENTER-rel lerakhatod oket. 7 lap felett
-                            dinamikus lapozas mukodik.
-                        </p>
-                    </div>
-                    <div
-                        class="bg-gray-800/60 p-4 rounded-xl border border-gray-700/50"
-                    >
-                        <h3 class="font-semibold text-lg text-white mb-1">
-                            8-Bites Retro Hangok
-                        </h3>
-                        <p class="text-sm text-gray-300">
-                            Beepitett chiptune szintetizator: laplerakas,
-                            kartyahuzas, akciohangok, UNO riasztas es gyozelmi
-                            zene.
-                        </p>
-                    </div>
-                    <div
-                        class="bg-gray-800/60 p-4 rounded-xl border border-gray-700/50"
-                    >
-                        <h3 class="font-semibold text-lg text-white mb-1">
-                            Magyar Nyelvu Kezelofelulet
-                        </h3>
-                        <p class="text-sm text-gray-300">
-                            A jatek alapertelmezetten magyarul indul, a diakok
-                            azonnal ertik a szabalyokat es a menupontokat.
-                        </p>
-                    </div>
-                    <div
-                        class="bg-gray-800/60 p-4 rounded-xl border border-gray-700/50"
-                    >
-                        <h3 class="font-semibold text-lg text-white mb-1">
-                            Hivatalos UNO Szabalyok
-                        </h3>
-                        <p class="text-sm text-gray-300">
-                            Pakli ujrakeverese a dobopaklibol, egyszeri
-                            akciohatasok, szabalyos 2 fos Fordito-kimaradas es
-                            UNO figyelmeztetes.
-                        </p>
-                    </div>
-                    <div
-                        class="bg-gray-800/60 p-4 rounded-xl border border-gray-700/50"
-                    >
-                        <h3 class="font-semibold text-lg text-white mb-1">
-                            Beallitasok Mentese
-                        </h3>
-                        <p class="text-sm text-gray-300">
-                            A kivalasztott beallitasok (hangero, nyelv, zene)
-                            automatikusan elmentodnek a gepeden.
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            <section
-                id="how-to-play"
-                class="bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-lg mb-8"
-            >
-                <h2 class="text-3xl font-bold text-green-400 mb-4">
-                    Iranyitas a Jatekban
-                </h2>
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-200 mb-1">
-                            Gombok es Parancsok:
-                        </h3>
-                        <ul
-                            class="list-disc list-inside space-y-2 text-gray-300"
-                        >
-                            <li>
-                                <kbd
-                                    class="bg-gray-800 px-2 py-0.5 rounded border border-gray-700 text-yellow-400"
-                                    >&larr;</kbd
-                                >
-                                /
-                                <kbd
-                                    class="bg-gray-800 px-2 py-0.5 rounded border border-gray-700 text-yellow-400"
-                                    >&rarr;</kbd
-                                >
-                                : Lap kivalasztasa a kezben
-                            </li>
-                            <li>
-                                <kbd
-                                    class="bg-gray-800 px-2 py-0.5 rounded border border-gray-700 text-green-400"
-                                    >ENTER</kbd
-                                >
-                                /
-                                <kbd
-                                    class="bg-gray-800 px-2 py-0.5 rounded border border-gray-700 text-green-400"
-                                    >SZOKOZ</kbd
-                                >
-                                : Kivalasztott lap lerakasa
-                            </li>
-                            <li>
-                                <kbd
-                                    class="bg-gray-800 px-2 py-0.5 rounded border border-gray-700 text-cyan-400"
-                                    >1 - 9</kbd
-                                >
-                                : Lap azonnali kijatszasa sorszam alapjan
-                            </li>
-                            <li>
-                                <kbd
-                                    class="bg-gray-800 px-2 py-0.5 rounded border border-gray-700 text-red-400"
-                                    >D</kbd
-                                >
-                                : Kartya huzasa a paklibol
-                            </li>
-                            <li>
-                                <kbd
-                                    class="bg-gray-800 px-2 py-0.5 rounded border border-gray-700 text-gray-400"
-                                    >Q</kbd
-                                >
-                                : Kilepes / Uj jatek
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <section
-                id="source-code"
-                class="bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-lg mb-8"
-            >
-                <h2 class="text-3xl font-bold text-blue-400 mb-4 text-center">
-                    Futtatas & Docker
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-
-                    <div
-                        class="bg-black/50 p-5 rounded-xl border border-gray-800"
-                    >
-                        <h3
-                            class="text-lg font-semibold text-white mb-2 font-mono"
-                        >
-                            1. Helyi futtatas (.NET 10 SDK)
-                        </h3>
-                        <pre
-                            class="code-font text-xs text-green-400 overflow-x-auto p-3 bg-black/80 rounded-lg"
-                        >
-git clone https://github.com/CsPS0/Console-UNO.git
-cd Console-UNO/uno-game/uno-game
-dotnet run</pre>
-                    </div>
-
-                    <div
-                        class="bg-black/50 p-5 rounded-xl border border-gray-800"
-                    >
-                        <h3
-                            class="text-lg font-semibold text-white mb-2 font-mono"
-                        >
-                            2. Docker Compose (Web & Terminal)
-                        </h3>
-                        <pre
-                            class="code-font text-xs text-green-400 overflow-x-auto p-3 bg-black/80 rounded-lg"
-                        >
-# Web verzio inditasa (http://localhost:3000):
-docker compose up -d web
-
-# Terminalos jatek inditasa:
-docker compose run --rm game</pre>
-                    </div>
+            <div class="tui-window">
+                <div class="tui-header">
+                    <span>+--- CONSOLE UNO: TUI TERMINAL ENGINE ---+</span>
+                    <span class="text-xs">.NET 10 / JS</span>
                 </div>
 
-                <div class="bg-black/50 p-5 rounded-xl border border-gray-800 mb-6">
-                    <h3 class="text-lg font-semibold text-white mb-2 font-mono">
-                        3. Szukseges Docker Image-ek (Letoltes / Pull):
-                    </h3>
-                    <pre
-                        class="code-font text-xs text-cyan-400 overflow-x-auto p-3 bg-black/80 rounded-lg"
-                    >
-# Web szerverhez (localhost:3000):
-docker pull nginx:alpine
-
-# Konzol jatekhoz (.NET 10 Arch Linuxon / barmely rendszeren):
-docker pull mcr.microsoft.com/dotnet/sdk:10.0
-docker pull mcr.microsoft.com/dotnet/runtime:10.0
-
-# Közvetlen futtatás terminalban:
-docker build -t console-uno .
-docker run -it --rm console-uno</pre>
+                <div
+                    id="terminal-screen"
+                    class="tui-body"
+                    tabindex="0"
+                >
+                    Betoltés...
                 </div>
 
-                <div class="text-center">
-                    <a
-                        href="https://github.com/CsPS0/Console-UNO"
-                        target="_blank"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 ease-in-out inline-block shadow-lg"
+                <div class="bg-black border-t border-gray-800 p-3 flex flex-wrap gap-2 justify-center items-center">
+                    <button
+                        onclick="window.UNO.moveLeft()"
+                        class="tui-btn"
                     >
-                        Megtekintes GitHub-on
-                    </a>
+                        &larr; Balra
+                    </button>
+                    <button
+                        onclick="window.UNO.playCurrent()"
+                        class="tui-btn tui-btn-primary"
+                    >
+                        Lerakas (ENTER)
+                    </button>
+                    <button
+                        onclick="window.UNO.moveRight()"
+                        class="tui-btn"
+                    >
+                        Jobbra &rarr;
+                    </button>
+                    <button
+                        onclick="window.UNO.draw()"
+                        class="tui-btn tui-btn-danger"
+                    >
+                        Huzas (D)
+                    </button>
+                    <button
+                        onclick="window.UNO.setScreen('MAIN_MENU')"
+                        class="tui-btn"
+                    >
+                        Fomenu (Q)
+                    </button>
                 </div>
-            </section>
+            </div>
 
-            <footer class="text-center text-gray-500 text-sm py-4">
+            <footer class="mt-4 text-center text-xs text-gray-500 font-mono">
                 Console UNO. Keszitette: Solti Csongor Peter.
             </footer>
         </div>

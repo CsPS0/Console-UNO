@@ -166,7 +166,7 @@ namespace ConsoleUno
 
                 do
                 {
-                    var key = Console.ReadKey(true);
+                    var key = SafeReadKey();
                     colorChoice = key.KeyChar - '1';
                 } while (colorChoice < 0 || colorChoice >= colors.Length);
 
@@ -552,7 +552,7 @@ namespace ConsoleUno
                         int pageStart = (selectedIndex / pageSize) * pageSize;
                         DrawGameBoard(playerHands[currentPlayer], currentCard, currentPlayer, isSinglePlayer, clockwise, selectedIndex, pageStart);
 
-                        var key = Console.ReadKey(true);
+                        var key = SafeReadKey();
 
                         if (key.Key == ConsoleKey.Q)
                         {
@@ -633,7 +633,7 @@ namespace ConsoleUno
                                         : "\n  The drawn card can be played! Play it now? [ENTER: Yes / Any other key: Pass]");
                                     Console.ResetColor();
 
-                                    var decision = Console.ReadKey(true);
+                                    var decision = SafeReadKey();
                                     if (decision.Key == ConsoleKey.Enter || decision.Key == ConsoleKey.Spacebar)
                                     {
                                         playedCard = drawn;
@@ -868,7 +868,7 @@ namespace ConsoleUno
                 ? "(Nyomj meg egy gombot, amikor keszen allsz a lapjaid megtekintesere!)"
                 : "(Press any key when ready to view your cards!)", ConsoleColor.Gray);
             CenterColoredText("===============================================", ConsoleColor.DarkGray);
-            Console.ReadKey(true);
+            SafeReadKey();
             _soundManager.PlayMenuBeep();
         }
 
@@ -923,7 +923,7 @@ namespace ConsoleUno
             CenterColoredText(_isHungarian ? "Gratulalunk a remek taktikanak!" : "Congratulations on a fantastic game!", ConsoleColor.White);
             Console.WriteLine();
             CenterColoredText(_isHungarian ? "Nyomj meg egy gombot a fomenube valo visszatereshez..." : "Press any key to return to Main Menu...", ConsoleColor.DarkGray);
-            Console.ReadKey(true);
+            SafeReadKey();
         }
         #endregion
 
@@ -933,7 +933,7 @@ namespace ConsoleUno
             while (true)
             {
                 DrawMainMenu();
-                var key = Console.ReadKey(true);
+                var key = SafeReadKey();
                 _soundManager.PlayMenuBeep();
 
                 switch (key.KeyChar)
@@ -1031,7 +1031,7 @@ namespace ConsoleUno
                     CenterColoredText(line, ConsoleColor.Cyan);
                 }
 
-                var key = Console.ReadKey(true);
+                var key = SafeReadKey();
                 _soundManager.PlayMenuBeep();
 
                 switch (key.KeyChar)
@@ -1083,7 +1083,7 @@ namespace ConsoleUno
                     CenterColoredText(line, ConsoleColor.Cyan);
                 }
 
-                var key = Console.ReadKey(true);
+                var key = SafeReadKey();
                 _soundManager.PlayMenuBeep();
 
                 if (key.KeyChar == '2') return;
@@ -1105,7 +1105,7 @@ namespace ConsoleUno
             CenterColoredText(_isHungarian ? "Hany jatekos jatszik? (2-4):" : "How many players? (2-4):", ConsoleColor.Yellow);
 
             int playerCount;
-            while (!int.TryParse(Console.ReadKey(true).KeyChar.ToString(), out playerCount) || playerCount < 2 || playerCount > 4)
+            while (!int.TryParse(SafeReadKey().KeyChar.ToString(), out playerCount) || playerCount < 2 || playerCount > 4)
             {
                 _soundManager.PlayInvalid();
             }
@@ -1186,7 +1186,7 @@ namespace ConsoleUno
                     CenterColoredText(line, ConsoleColor.Cyan);
                 }
 
-                var key = Console.ReadKey(true);
+                var key = SafeReadKey();
                 _soundManager.PlayMenuBeep();
 
                 switch (key.KeyChar)
@@ -1293,7 +1293,7 @@ namespace ConsoleUno
 
             Console.WriteLine("\n");
             CenterColoredText(_isHungarian ? "Nyomj meg egy gombot a visszatereshez..." : "Press any key to return...", ConsoleColor.DarkGray);
-            Console.ReadKey(true);
+            SafeReadKey();
             _soundManager.PlayMenuBeep();
         }
         #endregion
@@ -1385,6 +1385,60 @@ namespace ConsoleUno
             catch
             {
 
+            }
+        }
+
+        private static ConsoleKeyInfo SafeReadKey()
+        {
+            if (Console.IsInputRedirected)
+            {
+                try
+                {
+                    int ch = Console.Read();
+                    if (ch == -1) return new ConsoleKeyInfo('\0', ConsoleKey.NoName, false, false, false);
+                    char c = (char)ch;
+                    ConsoleKey key = c switch
+                    {
+                        '1' => ConsoleKey.D1,
+                        '2' => ConsoleKey.D2,
+                        '3' => ConsoleKey.D3,
+                        '4' => ConsoleKey.D4,
+                        '5' => ConsoleKey.D5,
+                        '6' => ConsoleKey.D6,
+                        '7' => ConsoleKey.D7,
+                        '8' => ConsoleKey.D8,
+                        '9' => ConsoleKey.D9,
+                        'd' or 'D' => ConsoleKey.D,
+                        'q' or 'Q' => ConsoleKey.Q,
+                        '\r' or '\n' => ConsoleKey.Enter,
+                        ' ' => ConsoleKey.Spacebar,
+                        _ => ConsoleKey.NoName
+                    };
+                    return new ConsoleKeyInfo(c, key, false, false, false);
+                }
+                catch
+                {
+                    return new ConsoleKeyInfo('\0', ConsoleKey.NoName, false, false, false);
+                }
+            }
+
+            try
+            {
+                return Console.ReadKey(true);
+            }
+            catch (InvalidOperationException)
+            {
+                try
+                {
+                    int ch = Console.Read();
+                    if (ch == -1) return new ConsoleKeyInfo('\0', ConsoleKey.NoName, false, false, false);
+                    char c = (char)ch;
+                    return new ConsoleKeyInfo(c, ConsoleKey.NoName, false, false, false);
+                }
+                catch
+                {
+                    return new ConsoleKeyInfo('\0', ConsoleKey.NoName, false, false, false);
+                }
             }
         }
         #endregion
