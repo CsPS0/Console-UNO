@@ -1,57 +1,45 @@
-# UNO Rules 🎴  
+# UNO Jatekszabalyok
 
-## 🎯 Objective  
-The goal is simple: **be the first to reach 500 points!**  
-You earn points by being the first to play all your cards in a round. Any cards left in your opponents’ hands will give you extra points.  
+## A jatek celja
+A jatek celja eloszor megszabadulni az osszes kezben tartott laptol.
 
-## 🃏 Setup  
-- UNO can be played with **2 to 10 players**.  
-- Each player starts with **7 cards**.  
-- The rest of the deck is placed **face-down** as the draw pile.  
-- The top card is flipped over to **start the discard pile**.  
-  - If the first card is an action card (Skip, Reverse, Draw Two, Wild, or Wild Draw Four), the effect **still applies**!  
+---
 
-## 🔹 Card Types  
-UNO has **two types of cards**:  
+## Elokeszuletek
+- A jatek 2-4 jatekossal jatszhato ebben a verzioban.
+- Minden jatekos 7 lappal kezd.
+- A pakli megmaradt resze a huzopakli.
+- A legfelso kartya felcsapasaval indul a dobopakli.
 
-### 🎨 Number Cards (0-9)  
-These are **regular** cards in four colors: **red, green, blue, and yellow**.  
+---
 
-### 🎭 Action Cards  
-These cards **shake up the game** with special effects:  
-- **Skip ⏭️** – The next player loses their turn.  
-- **Reverse 🔄** – Changes the direction of play.  
-- **Draw Two ➕2** – The next player must draw **two cards** and lose their turn.  
-- **Wild 🎨** – The player chooses the next color to be played.  
-- **Wild Draw Four 🎨➕4** – Choose a new color AND force the next player to draw **four cards**! (But only if you don’t have a matching color to play.)  
+## Kartyatipusok
 
-## 🚀 How to Play  
-1️⃣ The player **to the left** of the dealer goes first.  
-2️⃣ Each turn, you must **match** the card on the discard pile by **color, number, or symbol**.  
-3️⃣ If you **can’t play**, draw a card!  
-   - If the drawn card **matches**, you can play it immediately.  
-   - If not, your turn **ends**.  
-4️⃣ Use action cards **strategically** to make your opponents struggle! 😈  
+### Szamkartyak (0-9)
+Negy szinben elerheto kartyak: Piros, Kek, Zold es Sarga.
 
-## 🔥 Special Actions  
-- **Skip** – The next player **misses** their turn.  
-- **Reverse** – Changes the game’s direction (clockwise ↔️ counterclockwise).  
-- **Draw Two** – The next player **draws 2 cards** and skips their turn.  
-- **Wild** – Choose **any color** to continue the game.  
-- **Wild Draw Four** – Pick a new color **and** make the next player **draw 4 cards** (only if you have no playable colors).  
+### Akciokartyak
+- **Kimaradsz [X] (Skip)**: A soron kovetkezo jatekos kimarad a korbol.
+- **Fordito [<>] (Reverse)**: Megforditja a jatek haladasi iranyat (2 jatekos eseten kimaradaskent mukodik).
+- **Huzz kettot [+2] (Draw Two)**: A kovetkezo jatekos huz 2 kartyat a huzopaklibol es kimarad.
+- **Vad [W] (Wild)**: Barmilyen lapra kijatszhato, a jatekos megvalasztja a jatek uj aktiv szinet.
+- **Vad Huzz Negyet [+4 W] (Wild Draw Four)**: Uj szint valaszt a kijatszo, es a kovetkezo jatekos 4 lapot huz, majd kimarad a korbol.
 
-## 🗣️ Calling "UNO!"  
-When you’re down to **one card**, you **must** shout **"UNO!"** 🎉  
-If someone catches you **before your next turn**, you have to **draw 2 cards** as a penalty! 😱  
+---
 
-## 🏆 Winning a Round  
-A round **ends** when a player plays their **last card**.  
-Then, all remaining cards in opponents’ hands give the winner **extra points**:  
-- **Number cards (0-9):** Face value  
-- **Skip, Reverse, Draw Two:** 20 points  
-- **Wild, Wild Draw Four:** 50 points  
+## Menet es Kijatszas
+1. A jatekosok felvaltva kovetkeznek az aktualis iranynak megfeleloen.
+2. A soron levo jatekos olyan kartyat rakhat le, amely szinben vagy ertekben megegyezik a dobopakli legfelso lapjaval, vagy Vad kartya.
+3. Ha nem tud lapot letenni, huznia kell a paklibol (D gomb).
+4. Ha a huzott lap lerakhato, a jatekos donthet ugy, hogy azonnal megjatssza azt.
+5. Ha a huzopakli elfogy, a jatek a korabbi dobopaklit automatikusan ujrakeveri.
 
-## 🏅 Winning the Game  
-The first player to reach **500 points** is the **ultimate UNO champion!** 🏆  
+---
 
-Have fun and play smart! 😉  
+## UNO Bemondas
+Amikor egy jatekosnak mar csak egyetlen lapja marad a kezeben, a jatek bemondja az "UNO!" figyelmeztetest, felkeszitve a tobbieket az utolso korre.
+
+---
+
+## Gyozelem
+A menetet az a jatekos nyeri, aki legeloszor lerakja az osszes lapjat.

@@ -1,113 +1,94 @@
-# UNO Kártyajáték Dokumentáció
+# Console UNO – Projekt Dokumentáció
 
 ## Projekt Áttekintés
-Ez egy konzolos UNO kártyajáték C#-ban implementálva, többféle játékmóddal, hangeffektekkel és interaktív menükkel.
+Ez egy konzolos UNO kártyajáték C# (.NET 10) nyelven implementálva. A projekt a diákoknak szóló interaktív bemutatókhoz készült, látványos ASCII felülettel és beépített 8-bites hangokkal.
 
-## Projekt Szerkezete
+---
 
-### Fő Komponensek
-- `Program.cs`: Minden itt van, mivel nem tudtam, hogy lehet-e könyvtárakat használni....
+## Projekt Szerkezete és Architektúrája
+
+A forráskód tiszta, moduláris szerkezetre épül:
+- `Program.cs`: Belépési pont, UTF-8 karakterkódolás és konzolcím inicializálása.
+- `Card.cs`: A kartya modell, ASCII-doboz generator (`GetAsciiLines`), szimbolumok (`X`, `<>`, `+2`, `+4`, `W`), konzolszinek es ketnyelvu (magyar/angol) lokalizacio.
+- `Game.cs`: A teljes játékmotor, állapotkezelés, Fisher-Yates keverő algoritmus, körök és szabályok végrehajtása, tábla kirajzolása, interaktív kurzoros kártyaválasztó és menürendszer.
+- `GameSettings.cs`: Perzisztens beállítások modellje (`settings.json`).
+- `SoundManager.cs`: Beépített, aszinkron 8-bites retro chiptune hangszintetizátor (`Console.Beep` és háttérszálak segítségével). Külső fájlok és könyvtárfüggőségek nélkül működik.
+
+---
 
 ## Főbb Funkciók
 
-### Játékmódok
-1. Egyjátékos
-   - 1v1
-   - 1v1v1
-   - 1v1v1v1
-2. Helyi Többjátékos (2-4 játékos)
-3. Tervezett: Online Többjátékos (Nem implementált)
+### 1. Játékmódok
+- **Egyjátékos mód (vs AI)**:
+  - 1v1 (Te vs 1 AI)
+  - 1v1v1 (Te vs 2 AI)
+  - 1v1v1v1 (Te vs 3 AI)
+- **Helyi Többjátékos (2-4 játékos)**:
+  - Körönkénti képernyővédő („Add át a gépet...”), így a játékosok nem látják egymás lapjait.
 
-### Beállítások
-- Hang Be/Ki
-- Hangeffekt hangerő
-- Zene hangerő
-- Animációk Be/Ki
+### 2. Grafikus Felület és Irányítás
+- **Vizuális kártyamegjelenítés**: Többsoros színes ASCII kártyadobozok piros, kék, zöld, sárga és lila vad színekben.
+- **Interaktív kurzor**: `←` és `→` nyilakkal tallózható kéz, `ENTER` vagy `SZÓKÖZ` a lerakáshoz.
+- **Lapozás**: 7 lap feletti kéznél dinamikus lapozás (`«` és `»`), minden lap elérhető és kijátszható marad.
+- **Közvetlen gombok**: `1`-`9` számgombok a lap azonnali megjátszásához, `D` a húzáshoz, `Q` a kilépéshez.
 
-## Osztályok Részletesen
+### 3. Audió Rendszer
+- Külső `.wav` fájlokat nem igénylő, beépített chiptune szintetizátor.
+- Külön hangok:
+  - Laplerakás és laphúzás
+  - Speciális akciókártyák és színválasztás
+  - UNO riasztás
+  - Győzelmi fanfár
+  - Főmenü háttérzene (egyedi 8-bites téma, be- és kikapcsolható)
 
-### 1. Program Osztály
-- Alkalmazás belépési pontja
-- Konzol címének beállítása
-- Játék inicializálása és indítása
+### 4. Hivatalos UNO Szabályok
+- **Dobópakli újrakeverése**: Ha a húzópakli elfogy, a dobópakli automatikusan újrakeveredik.
+- **Egyszeri akcióhatás**: Az akciókártyák (+2, +4, Skip, Reverse) hatása csak a kijátszás körében lép életbe, laphúzáskor nem ismétlődik.
+- **2 fős Reverse**: 2 játékos esetén a Fordító kártya szabályosan Kimaradásként (Skip) funkcionál.
+- **UNO bemondás**: 1 lapra csökkenéskor látványos vizuális és hangos figyelmeztetés.
 
-### 2. Kártya Osztály
-- Egy UNO kártyát reprezentál
-- Tulajdonságok:
-  - `Szín`: Kártya színe (Piros, Kék, Zöld, Sárga, Vad)
-  - `Érték`: Kártya értéke (0-9, Kihagy, Fordít, +2, +4, Vad)
+---
 
-### 3. Hangkezelő Osztály
-- Játék audió kezelése
-- Funkciók:
-  - Windows konzol sípoló hangok
-  - Hangerő szabályozás
-  - Zene és hangeffekt kezelés
+## Beállítások és Mentés
+- Kétnyelvűség: **Magyar** (alapértelmezett) és **English**
+- Hangeffektek: Be / Ki
+- Főmenü Zene: Be / Ki
+- Effektek és Zene hangerő: 20% - 100%
+- Automatikus mentés: `settings.json` (git által ignorálva)
 
-### 4. Játék Osztály
-#### Fő Játéklogika
-- Pakli inicializálás
-- Kártya húzás
-- Játékos kör kezelés
-- Nyerési feltételek ellenőrzése
+---
 
-#### Menürendszerek
-- Főmenü
-- Egyjátékos menü
-- Többjátékos menü
-- Beállítások menü
+## Futtatasi Lehetosegek es Docker
 
-## Játékszabályok Implementálása
+### 1. Helyi futtatas (.NET 10 SDK)
+```bash
+cd uno-game/uno-game
+dotnet run
+```
 
-### Kártya Kijátszási Szabályok
-- Kártyák kijátszhatók, ha:
-  - Szín megegyezik a jelenlegi kártyáéval
-  - Érték megegyezik a jelenlegi kártyáéval
-  - Vad kártya kijátszása
+### 2. Bongeszoben (GitHub Pages)
+A jatek a GitHub Pages oldalon kozvetlenul jatszhato barmilyen bongeszobol (kliensoldali JS motor, Web Audio szintetizator, billentyuzet- es gombvezerles).
 
-### Speciális Kártyák
-- Kihagy: Következő játékos kimarad
-- Fordít: Megváltoztatja a játék irányát
-- +2: Következő játékos húz 2 kártyát
-- +4: Következő játékos húz 4 kártyát és színt választ
-- Vad: Játékos választ új színt
+### 3. Docker Compose (Web localhost:3000 es Terminal)
+```bash
+# Weboldal elerese bongeszoben (http://localhost:3000):
+docker compose up -d web
 
-## Technikai Részletek
+# Interaktiv terminalos jatek futtatasa:
+docker compose run --rm game
+```
 
-### Véletlenszerűség
-- Pakli keverése Fisher-Yates algoritmussal
-- `Random` osztály játékmechanikákhoz
+### 4. Letoltendo Docker Image-ek (Eloadas elotti pull)
+```bash
+docker pull nginx:alpine
+docker pull mcr.microsoft.com/dotnet/sdk:10.0
+docker pull mcr.microsoft.com/dotnet/runtime:10.0
+```
 
-### Hangrendszer
-- `Console.Beep()` hangeffektekhez
-- Csak Windows kompatibilitás
-- Hangerő és némítás beállítások
+---
 
-### Animáció
-- Szöveg karakterenként jelenik meg
-- Kártya húzásnak vizuális és hanghatása
-- Kikapcsolható a beállításokban
-
-## Lehetséges Fejlesztések
-- Hálózati többjátékos mód
-- Összetettebb mesterséges intelligencia
-- Grafikus felhasználói felület
-- Állandó pontrendszer
-
-## Fejlesztési Környezet
-- Nyelv: C# (.NET)
-- Platform: Windows Konzol Alkalmazás
-
-## Licenc
-[Adja hozzá a kívánt licencet]
-
-## Közreműködők
-[Közreműködők vagy saját neve]
-
-## Verzió
-1.0.0
-
-## Ismert Problémák
-- Hang csak Windows-on működik
-- Korlátozott mesterséges intelligencia
-- Csak konzol felület
+## Fejlesztői és Iskolai Információ
+- **Iskola**: BMSZC Neumann János Informatikai Technikum
+- **Készítő**: Solti Csongor Péter
+- **Technológia**: C# / .NET 10, HTML5 / JS (Web Audio)
+- **Platform**: Windows Konzol, Linux / Docker, Web (GitHub Pages)

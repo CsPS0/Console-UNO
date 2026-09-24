@@ -1,0 +1,113 @@
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #030712;
+    color: #f3f4f6;
+    margin: 0;
+    padding: 1.5rem;
+}
+
+.code-font {
+    font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.terminal-window {
+    background-color: #0d1117;
+    border: 2px solid #30363d;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 15px rgba(56, 189, 248, 0.15);
+    overflow: hidden;
+}
+
+.terminal-header {
+    background-color: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.terminal-dots {
+    display: flex;
+    gap: 8px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.dot-red { background-color: #ff5f56; }
+.dot-yellow { background-color: #ffbd2e; }
+.dot-green { background-color: #27c93f; }
+
+.terminal-title {
+    font-size: 0.875rem;
+    color: #8b949e;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+}
+
+.terminal-body {
+    padding: 20px;
+    background-color: #090d13;
+    min-height: 440px;
+    overflow-x: auto;
+    color: #e6edf3;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: pre;
+    line-height: 1.35;
+    font-size: 13.5px;
+    user-select: none;
+}
+
+.ctrl-btn {
+    background-color: #21262d;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+}
+
+.ctrl-btn:hover {
+    background-color: #30363d;
+    color: #ffffff;
+    border-color: #8b949e;
+}
+
+.ctrl-btn-primary {
+    background-color: #238636;
+    border-color: #2ea043;
+    color: #ffffff;
+}
+
+.ctrl-btn-primary:hover {
+    background-color: #2ea043;
+}
+
+.ctrl-btn-danger {
+    background-color: #da3633;
+    border-color: #f85149;
+    color: #ffffff;
+}
+
+.ctrl-btn-danger:hover {
+    background-color: #f85149;
+}
+
+.c-red { color: #f87171; font-weight: bold; }
+.c-blue { color: #38bdf8; font-weight: bold; }
+.c-green { color: #4ade80; font-weight: bold; }
+.c-yellow { color: #facc15; font-weight: bold; }
+.c-wild { color: #c084fc; font-weight: bold; }
+.c-gray { color: #9ca3af; }
+.c-darkgray { color: #6b7280; }
+.c-cyan { color: #22d3ee; }
+.c-white { color: #ffffff; }

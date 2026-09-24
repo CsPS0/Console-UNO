@@ -1,0 +1,18 @@
+services:
+  web:
+    image: nginx:alpine
+    container_name: console-uno-web
+    ports:
+      - "3000:80"
+    volumes:
+      - ./docs:/usr/share/nginx/html:ro
+    restart: unless-stopped
+
+  game:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: console-uno:latest
+    container_name: console-uno-terminal
+    stdin_open: true
+    tty: true

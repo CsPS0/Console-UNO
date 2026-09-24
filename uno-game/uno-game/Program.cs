@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 
 namespace ConsoleUno
 {
@@ -6,7 +7,13 @@ namespace ConsoleUno
     {
         private static void Main()
         {
-            Console.Title = "UNO!";
+            try
+            {
+                Console.OutputEncoding = Encoding.UTF8;
+                Console.Title = "Console UNO";
+            }
+            catch { }
+
             var game = new Game();
             game.Start();
         }
